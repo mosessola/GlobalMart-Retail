@@ -1,0 +1,984 @@
+CREATE TABLE Orders AS
+SELECT * FROM read_csv_auto('Orders_part1.csv');
+
+INSERT INTO Orders
+SELECT * FROM read_csv_auto('Orders_part2.csv');
+
+INSERT INTO Orders
+SELECT * FROM read_csv_auto('Orders_part3.csv');
+
+INSERT INTO Orders
+SELECT * FROM read_csv_auto('Orders_part4.csv');
+-- ==========================================
+-- GLOBALMART RETAIL ANALYTICS
+-- Executive KPI Dashboard
+-- ==========================================
+
+SELECT
+    COUNT(*) AS Total_Orders,
+
+    COUNT(DISTINCT Customer_ID) AS Unique_Customers,
+
+    COUNT(DISTINCT Product_ID) AS Unique_Products,
+
+    SUM(Quantity) AS Units_Sold,
+
+    ROUND(SUM(Revenue),2) AS Total_Revenue,
+
+    ROUND(SUM(Cost),2) AS Total_Cost,
+
+    ROUND(SUM(Profit),2) AS Total_Profit,
+
+    ROUND(AVG(Revenue),2) AS Average_Order_Value,
+
+    ROUND(AVG(Profit),2) AS Average_Profit_Per_Order,
+
+    ROUND(
+        SUM(Profit)/SUM(Revenue)*100,
+        2
+    ) AS Profit_Margin_Percentage
+
+FROM Orders;
+SELECT
+    Sales_Channel,
+    COUNT(*) AS Orders,
+    SUM(Quantity) AS Units_Sold,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+FROM Orders
+GROUP BY Sales_Channel
+ORDER BY Revenue DESC;
+SELECT
+
+    CASE
+
+        WHEN Revenue >= 10000 THEN 'VIP'
+
+        WHEN Revenue >= 5000 THEN 'High Value'
+
+        WHEN Revenue >= 2000 THEN 'Regular'
+
+        ELSE 'Occasional'
+
+    END AS Customer_Type,
+
+    COUNT(*) AS Customers,
+
+    ROUND(AVG(Revenue),2) AS Average_Revenue,
+
+    ROUND(MIN(Revenue),2) AS Minimum_Revenue,
+
+    ROUND(MAX(Revenue),2) AS Maximum_Revenue,
+
+    ROUND(SUM(Revenue),2) AS Total_Revenue
+
+FROM
+(
+    SELECT
+
+        Customer_ID,
+
+        SUM(Revenue) AS Revenue
+
+    FROM Orders
+
+    GROUP BY Customer_ID
+) CustomerRevenue
+
+GROUP BY Customer_Type
+
+ORDER BY Total_Revenue DESC;
+SELECT
+
+    c.Loyalty_Status,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Loyalty_Status
+
+ORDER BY Revenue DESC;
+SELECT
+
+    Customer_Segment,
+
+    Loyalty_Status,
+
+    COUNT(*) AS Customers
+
+FROM Customers
+
+GROUP BY
+
+    Customer_Segment,
+    Loyalty_Status
+
+ORDER BY
+
+    Customer_Segment,
+    Loyalty_Status;
+    SELECT
+
+    c.Loyalty_Status,
+
+    ROUND(AVG(CustomerRevenue),2) AS Average_Customer_Revenue
+
+FROM
+
+(
+    SELECT
+
+        Customer_ID,
+
+        SUM(Revenue) AS CustomerRevenue
+
+    FROM Orders
+
+    GROUP BY Customer_ID
+
+) o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Loyalty_Status
+
+ORDER BY Average_Customer_Revenue DESC;
+SELECT
+
+    c.Gender,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Gender
+
+ORDER BY Revenue DESC;
+SELECT
+
+    c.Occupation,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Occupation
+
+ORDER BY Revenue DESC;
+SELECT
+
+    CASE
+
+        WHEN c.Age < 25 THEN '18-24'
+
+        WHEN c.Age BETWEEN 25 AND 34 THEN '25-34'
+
+        WHEN c.Age BETWEEN 35 AND 44 THEN '35-44'
+
+        WHEN c.Age BETWEEN 45 AND 54 THEN '45-54'
+
+        ELSE '55+'
+
+    END AS Age_Group,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY Age_Group
+
+ORDER BY Revenue DESC;
+SELECT
+
+    c.Country,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Country
+
+ORDER BY Revenue DESC;
+SELECT
+
+    c.Country,
+
+    c.State,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY
+
+    c.Country,
+    c.State
+
+ORDER BY Revenue DESC;
+SELECT
+
+    c.Country,
+
+    c.City,
+
+    COUNT(DISTINCT o.Customer_ID) AS Customers,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value
+
+FROM Orders o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY
+
+    c.Country,
+    c.City
+
+ORDER BY Revenue DESC
+LIMIT 20;
+SELECT
+
+    COUNT(DISTINCT Customer_ID) AS Total_Customers,
+
+    ROUND(AVG(CustomerRevenue),2) AS Average_CLV,
+
+    ROUND(MIN(CustomerRevenue),2) AS Minimum_CLV,
+
+    ROUND(MAX(CustomerRevenue),2) AS Maximum_CLV,
+
+    ROUND(SUM(CustomerRevenue),2) AS Total_Lifetime_Revenue
+
+FROM
+(
+    SELECT
+
+        Customer_ID,
+
+        SUM(Revenue) AS CustomerRevenue
+
+    FROM Orders
+
+    GROUP BY Customer_ID
+) CLV;
+SELECT
+
+    c.Customer_Segment,
+
+    COUNT(*) AS Customers,
+
+    ROUND(AVG(CustomerRevenue),2) AS Average_CLV,
+
+    ROUND(SUM(CustomerRevenue),2) AS Total_Revenue,
+
+    ROUND(MAX(CustomerRevenue),2) AS Highest_CLV
+
+FROM
+(
+    SELECT
+
+        Customer_ID,
+
+        SUM(Revenue) AS CustomerRevenue
+
+    FROM Orders
+
+    GROUP BY Customer_ID
+) o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Customer_Segment
+
+ORDER BY Average_CLV DESC;
+SELECT
+
+    c.Loyalty_Status,
+
+    COUNT(*) AS Customers,
+
+    ROUND(AVG(CustomerRevenue),2) AS Average_CLV,
+
+    ROUND(SUM(CustomerRevenue),2) AS Total_CLV
+
+FROM
+(
+    SELECT
+
+        Customer_ID,
+
+        SUM(Revenue) AS CustomerRevenue
+
+    FROM Orders
+
+    GROUP BY Customer_ID
+) o
+
+JOIN Customers c
+
+ON o.Customer_ID = c.Customer_ID
+
+GROUP BY c.Loyalty_Status
+
+ORDER BY Average_CLV DESC;
+SELECT
+
+    o.Customer_ID,
+
+    c.Country,
+
+    c.City,
+
+    c.Customer_Segment,
+
+    c.Loyalty_Status,
+
+    COUNT(ord.Order_ID) AS Orders,
+
+    ROUND(SUM(ord.Revenue),2) AS Lifetime_Revenue,
+
+    ROUND(SUM(ord.Profit),2) AS Lifetime_Profit,
+
+    ROUND(AVG(ord.Revenue),2) AS Average_Order_Value
+
+FROM Orders ord
+
+JOIN Customers c
+ON ord.Customer_ID = c.Customer_ID
+
+JOIN
+(
+    SELECT Customer_ID
+    FROM Orders
+    GROUP BY Customer_ID
+) o
+ON ord.Customer_ID = o.Customer_ID
+
+GROUP BY
+
+    o.Customer_ID,
+    c.Country,
+    c.City,
+    c.Customer_Segment,
+    c.Loyalty_Status
+
+ORDER BY Lifetime_Revenue DESC
+
+LIMIT 20;
+SELECT
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value
+
+FROM Orders o
+
+JOIN Products p
+
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand
+
+ORDER BY Revenue DESC
+
+LIMIT 20;
+SELECT
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand
+
+ORDER BY Profit DESC
+
+LIMIT 20;
+SELECT
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue
+
+FROM Orders o
+
+JOIN Products p
+
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Product_ID,
+    p.Product_Name,
+    p.Category,
+    p.Brand
+
+ORDER BY Units_Sold DESC
+
+LIMIT 20;
+SELECT
+
+    p.Brand,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(AVG(o.Revenue),2) AS Average_Order_Value,
+
+    ROUND(SUM(o.Profit)/SUM(o.Revenue)*100,2) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY p.Brand
+
+ORDER BY Revenue DESC;
+SELECT
+
+    p.Brand,
+
+    ROUND(SUM(o.Profit),2) AS Total_Profit,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit)/SUM(o.Revenue)*100,2) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY p.Brand
+
+ORDER BY Total_Profit DESC;
+SELECT
+
+    p.Brand,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY p.Brand
+
+ORDER BY Units_Sold DESC;
+SELECT
+
+    p.Category,
+
+    p.Brand,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Category,
+    p.Brand
+
+ORDER BY
+
+    p.Category,
+    Revenue DESC;
+    SELECT
+
+    p.Category,
+    p.Subcategory,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Category,
+    p.Subcategory
+
+ORDER BY Revenue DESC;
+SELECT
+
+    p.Category,
+    p.Subcategory,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Category,
+    p.Subcategory
+
+ORDER BY Profit DESC;
+SELECT
+
+    p.Category,
+    p.Subcategory,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Category,
+    p.Subcategory
+
+ORDER BY Units_Sold DESC;
+SELECT
+
+    p.Category,
+    p.Subcategory,
+
+    COUNT(o.Order_ID) AS Orders,
+
+    SUM(o.Quantity) AS Units_Sold,
+
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+
+    ROUND(SUM(o.Profit),2) AS Profit,
+
+    ROUND(
+        SUM(o.Profit)/SUM(o.Revenue)*100,
+        2
+    ) AS Profit_Margin
+
+FROM Orders o
+
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+
+GROUP BY
+
+    p.Category,
+    p.Subcategory
+
+ORDER BY
+
+    p.Category,
+    Revenue DESC;
+    SELECT
+    Payment_Method,
+    COUNT(*) AS Orders,
+    SUM(Quantity) AS Units_Sold,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND(AVG(Revenue),2) AS Average_Order_Value,
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+FROM Orders
+GROUP BY Payment_Method
+ORDER BY Revenue DESC;
+SELECT
+    Sales_Channel,
+    Payment_Method,
+    COUNT(*) AS Orders,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders 
+GROUP BY Sales_Channel, Payment_Method
+ORDER BY Sales_Channel, Revenue DESC;
+SELECT
+    Payment_Method,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Revenue),2) AS Average_Order_Value,
+    ROUND(MAX(Revenue),2) AS Highest_Order,
+    ROUND(MIN(Revenue),2) AS Lowest_Order
+FROM Orders 
+GROUP BY Payment_Method
+ORDER BY Average_Order_Value DESC;
+SELECT
+    p.Category,
+    o.Payment_Method,
+    COUNT(*) AS Orders,
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+    ROUND(SUM(o.Profit),2) AS Profit,
+    ROUND((SUM(o.Profit)/SUM(o.Revenue))*100,2) AS Profit_Margin
+FROM Orders o
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+GROUP BY p.Category, o.Payment_Method
+ORDER BY p.Category, Revenue DESC;
+DESCRIBE Orders;
+SELECT
+    YEAR(Date) AS Year,
+    MONTH(Date) AS Month_Number,
+    MONTHNAME(Date) AS Month,
+    COUNT(*) AS Orders,
+    SUM(Quantity) AS Units_Sold,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY
+    YEAR(Date),
+    MONTH(Date),
+    MONTHNAME(Date)
+ORDER BY
+    Year,
+    Month_Number;
+    SELECT
+    YEAR(Date) AS Year,
+    QUARTER(Date) AS Quarter,
+    COUNT(*) AS Orders,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+FROM Orders
+GROUP BY
+    YEAR(Date),
+    QUARTER(Date)
+ORDER BY
+    Year,
+    Quarter;
+    SELECT
+    DAYNAME(Date) AS Day_of_Week,
+    COUNT(*) AS Orders,
+    SUM(Quantity) AS Units_Sold,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND(AVG(Revenue),2) AS Average_Order_Value
+FROM Orders
+GROUP BY
+    DAYNAME(Date)
+ORDER BY Revenue DESC;
+SELECT
+    CASE
+        WHEN DAYOFWEEK(Date) IN (1,7) THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS Day_Type,
+    COUNT(*) AS Orders,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+FROM Orders
+GROUP BY Day_Type;SELECT
+    CASE
+        WHEN DAYOFWEEK(Date) IN (1,7) THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS Day_Type,
+    COUNT(*) AS Orders,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+FROM Orders
+GROUP BY Day_Type;
+SELECT
+    CASE
+        WHEN DAYNAME(Date) IN ('Saturday','Sunday')
+            THEN 'Weekend'
+        ELSE 'Weekday'
+    END AS Day_Type,
+
+    COUNT(*) AS Orders,
+
+    ROUND(SUM(Revenue),2) AS Revenue,
+
+    ROUND(SUM(Profit),2) AS Profit,
+
+    ROUND((SUM(Profit)/SUM(Revenue))*100,2) AS Profit_Margin
+
+FROM Orders
+
+GROUP BY Day_Type;
+SELECT
+    ROUND(AVG(Shipping_Cost),2) AS Average_Shipping_Cost,
+    MIN(Shipping_Cost) AS Lowest_Shipping_Cost,
+    MAX(Shipping_Cost) AS Highest_Shipping_Cost,
+    ROUND(AVG(Delivery_Days),2) AS Average_Delivery_Days,
+    MIN(Delivery_Days) AS Fastest_Delivery,
+    MAX(Delivery_Days) AS Slowest_Delivery
+FROM Orders;
+SELECT
+    Shipping_Method,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Shipping_Cost),2) AS Average_Shipping_Cost,
+    ROUND(AVG(Delivery_Days),2) AS Average_Delivery_Days,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY Shipping_Method
+ORDER BY Revenue DESC;
+DESCRIBE Shipments;
+SELECT
+    ROUND(AVG(Shipping_Cost),2) AS Average_Shipping_Cost,
+    MIN(Shipping_Cost) AS Lowest_Shipping_Cost,
+    MAX(Shipping_Cost) AS Highest_Shipping_Cost,
+    ROUND(AVG(Delivery_Days),2) AS Average_Delivery_Days,
+    MIN(Delivery_Days) AS Fastest_Delivery,
+    MAX(Delivery_Days) AS Slowest_Delivery
+FROM Orders;
+SELECT
+    Sales_Channel,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Shipping_Cost),2) AS Average_Shipping_Cost,
+    ROUND(AVG(Delivery_Days),2) AS Average_Delivery_Days,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY Sales_Channel
+ORDER BY Revenue DESC;
+SELECT
+    Category,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Shipping_Cost),2) AS Average_Shipping_Cost,
+    ROUND(AVG(Delivery_Days),2) AS Average_Delivery_Days,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY Category
+ORDER BY Revenue DESC;
+SELECT
+    p.Category,
+    COUNT(*) AS Orders,
+    ROUND(AVG(o.Shipping_Cost),2) AS Average_Shipping_Cost,
+    ROUND(AVG(o.Delivery_Days),2) AS Average_Delivery_Days,
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+    ROUND(SUM(o.Profit),2) AS Profit
+FROM Orders o
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+GROUP BY p.Category
+ORDER BY Revenue DESC;
+SELECT
+    ROUND(AVG(Discount),2) AS Average_Discount,
+    MIN(Discount) AS Lowest_Discount,
+    MAX(Discount) AS Highest_Discount,
+    ROUND(SUM(Revenue),2) AS Total_Revenue,
+    ROUND(SUM(Profit),2) AS Total_Profit
+FROM Orders;
+SELECT
+    Sales_Channel,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Discount),2) AS Average_Discount,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit,
+    ROUND(AVG(Profit),2) AS Average_Profit_Per_Order
+FROM Orders
+GROUP BY Sales_Channel
+ORDER BY Revenue DESC;
+SELECT
+    Payment_Method,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Discount),2) AS Average_Discount,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY Payment_Method
+ORDER BY Revenue DESC;
+SELECT
+    Payment_Method,
+    COUNT(*) AS Orders,
+    ROUND(AVG(Discount),2) AS Average_Discount,
+    ROUND(SUM(Revenue),2) AS Revenue,
+    ROUND(SUM(Profit),2) AS Profit
+FROM Orders
+GROUP BY Payment_Method
+ORDER BY Revenue DESC;
+SELECT
+    p.Category,
+    COUNT(*) AS Orders,
+    ROUND(AVG(o.Discount),2) AS Average_Discount,
+    ROUND(SUM(o.Revenue),2) AS Revenue,
+    ROUND(SUM(o.Profit),2) AS Profit
+FROM Orders o
+JOIN Products p
+ON o.Product_ID = p.Product_ID
+GROUP BY p.Category
+ORDER BY Revenue DESC;
+Describe Shipments;
+
